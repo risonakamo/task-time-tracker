@@ -1,0 +1,3 @@
+[submodule "task-time-tracker-web"]
+	path = task-time-tracker-web
+	url = https://github.com/risonakamo/task-time-tracker-web.git
