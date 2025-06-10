@@ -1,0 +1,11 @@
+meta {
+  name: get state
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseurl}}/task-state
+  body: none
+  auth: inherit
+}

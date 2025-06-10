@@ -18,7 +18,11 @@ type StartTaskReq struct {
 
 // state container to send out
 type TTTState struct {
+    // if there is actually a current task
+    CurrentTaskValid bool `json:"currentTaskValid"`
+    // this might empty task if none active
     CurrentTask ttt.TimeEntry `json:"currentTask"`
+
     AllTasks []*ttt.TimeEntry `json:"allTasks"`
 }
 
@@ -46,14 +50,25 @@ func main() {
     // --- state
     // list of time entrys
     var timeEntrys []*ttt.TimeEntry=[]*ttt.TimeEntry{}
+
+    // the current task. also exists in the time entrys
     var currentTask *ttt.TimeEntry=nil
 
 
     // --- functions
     // create ttt state for sending out
     createAppState:=func() TTTState {
+        var currentTaskValid bool=false
+        var curTaskForAppstate ttt.TimeEntry
+
+        if currentTask!=nil {
+            currentTaskValid=true
+            curTaskForAppstate=*currentTask
+        }
+
         return TTTState{
-            CurrentTask: *currentTask,
+            CurrentTaskValid: currentTaskValid,
+            CurrentTask: curTaskForAppstate,
             AllTasks: timeEntrys,
         }
     }
@@ -85,6 +100,23 @@ func main() {
         timeEntrys=append(timeEntrys,&newTask)
         currentTask=&newTask
 
+        var result TTTState=createAppState()
+        return c.JSON(result)
+    })
+
+    // stops the current task, if there is any. returns the new state
+    app.Post("/stop-task",func(c fiber.Ctx) error {
+        if currentTask!=nil {
+            ttt.EndTask(currentTask)
+            currentTask=nil
+        }
+
+        var result TTTState=createAppState()
+        return c.JSON(result)
+    })
+
+    // get the current app state
+    app.Get("/task-state",func(c fiber.Ctx) error {
         var result TTTState=createAppState()
         return c.JSON(result)
     })
