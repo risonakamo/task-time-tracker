@@ -9,15 +9,15 @@ import (
 
 // a single task time entry
 type TimeEntry struct {
-    Id string
-    Title string
+    Id string `json:"id"`
+    Title string `json:"title"`
 
     // unix time seconds
-    TimeStart int64
+    TimeStart int64 `json:"timeStart"`
     // unix time seconds. -1 if not set
-    TimeEnd int64
+    TimeEnd int64 `json:"timeEnd"`
     // seconds. -1 if not ended
-    Duration int64
+    Duration int64 `json:"duration"`
 }
 
 // create a new time entry with date starting at now

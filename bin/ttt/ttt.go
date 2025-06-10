@@ -19,7 +19,7 @@ type StartTaskReq struct {
 // state container to send out
 type TTTState struct {
     CurrentTask ttt.TimeEntry `json:"currentTask"`
-    AllTasks []ttt.TimeEntry `json:"allTasks"`
+    AllTasks []*ttt.TimeEntry `json:"allTasks"`
 }
 
 func main() {
@@ -45,7 +45,7 @@ func main() {
 
     // --- state
     // list of time entrys
-    var timeEntrys []ttt.TimeEntry=[]ttt.TimeEntry{}
+    var timeEntrys []*ttt.TimeEntry=[]*ttt.TimeEntry{}
     var currentTask *ttt.TimeEntry=nil
 
 
@@ -82,7 +82,7 @@ func main() {
 
         var newTask ttt.TimeEntry=ttt.NewTimeEntry(body.Title)
 
-        timeEntrys=append(timeEntrys,newTask)
+        timeEntrys=append(timeEntrys,&newTask)
         currentTask=&newTask
 
         var result TTTState=createAppState()

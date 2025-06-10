@@ -1,0 +1,17 @@
+meta {
+  name: start task
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:4602/start-task
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "title":"test-task"
+  }
+}
