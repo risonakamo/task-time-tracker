@@ -2,6 +2,7 @@
 package ttt
 
 import (
+	"sort"
 	"time"
 
 	"github.com/google/uuid"
@@ -37,4 +38,12 @@ func EndTask(task *TimeEntry) {
     var now int64=time.Now().Unix()
     task.TimeEnd=now
     task.Duration=now-task.TimeStart
+}
+
+// sorts time entry list by start time (latest comes first)
+// mutates the input array
+func SortTimeEntrys(tasks []*TimeEntry) {
+    sort.Slice(tasks, func(task1i int,task2i int) bool {
+        return tasks[task1i].TimeStart > tasks[task2i].TimeStart
+    })
 }

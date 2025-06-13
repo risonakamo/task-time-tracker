@@ -98,6 +98,7 @@ func main() {
         var newTask ttt.TimeEntry=ttt.NewTimeEntry(body.Title)
 
         timeEntrys=append(timeEntrys,&newTask)
+        ttt.SortTimeEntrys(timeEntrys)
         currentTask=&newTask
 
         var result TTTState=createAppState()
