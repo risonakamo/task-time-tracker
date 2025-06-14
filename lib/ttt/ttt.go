@@ -21,6 +21,18 @@ type TimeEntry struct {
     Duration int64 `json:"duration"`
 }
 
+// container of time entries
+type DayContainer struct {
+    Id string
+
+    // this day as a string
+    // 2025/01/02
+    DateKey string
+
+    Entries []*TimeEntry
+    TotalDuration int64
+}
+
 // create a new time entry with date starting at now
 func NewTimeEntry(title string) TimeEntry {
     return TimeEntry{
@@ -46,4 +58,16 @@ func SortTimeEntrys(tasks []*TimeEntry) {
     sort.Slice(tasks, func(task1i int,task2i int) bool {
         return tasks[task1i].TimeStart > tasks[task2i].TimeStart
     })
+}
+
+// compute the day string of a date. before hour marks the next day. if task occurs before
+// this hour, it counts as the previous day (if past midnight)
+func computeDate(unixTime int64,beforeHour int) string {
+    var entryDate time.Time=time.Unix(unixTime,0)
+
+    if entryDate.Hour()<beforeHour {
+        entryDate=entryDate.Add(-24*time.Hour)
+    }
+
+    return entryDate.Format("2006/01/02")
 }
