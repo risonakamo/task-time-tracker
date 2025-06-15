@@ -145,6 +145,14 @@ func main() {
 
 
     // --- running
+    e=utils.OpenTargetWithDefaultProgram(
+        "http://localhost:4602",
+    )
+
+    if e!=nil {
+        panic(e)
+    }
+
     e=app.Listen(":4602")
 
     if e!=nil {

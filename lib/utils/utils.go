@@ -2,6 +2,7 @@ package utils
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/rs/zerolog/log"
@@ -28,4 +29,17 @@ func GetHereDirExe() string {
     }
 
     return filepath.Dir(exePath)
+}
+
+// try to open web url or file with default program.
+// essentially runs program like it was double clicked
+func OpenTargetWithDefaultProgram(url string) error {
+    var cmd *exec.Cmd=exec.Command("cmd","/c","start",url)
+    var e error=cmd.Run()
+
+    if e!=nil {
+        return e
+    }
+
+    return nil
 }
