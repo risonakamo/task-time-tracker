@@ -86,6 +86,7 @@ func main() {
     organiseTimeEntries:=func() {
         ttt.SortTimeEntrys(timeEntrys)
         dayContainers=ttt.GroupTimeEntries(timeEntrys,beforeHour)
+        ttt.SortDayContainers(dayContainers)
     }
 
 

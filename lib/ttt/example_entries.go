@@ -85,4 +85,11 @@ var ExampleTimeEntries1 []*TimeEntry=[]*TimeEntry{
         TimeEnd:   time.Date(2025, 6, 14, 15, 30, 0, 0, time.Local).Unix(),
         Duration:  1800,
     },
+    {
+        Id:        uuid.New().String(),
+        Title:     "late night thing",
+        TimeStart: time.Date(2025, 6, 15, 2, 0, 0, 0, time.Local).Unix(),
+        TimeEnd:   time.Date(2025, 6, 15, 3, 30, 0, 0, time.Local).Unix(),
+        Duration:  1800,
+    },
 }

@@ -16,12 +16,12 @@ type DayContainerDict map[string]*DayContainer
 type DayContainer struct {
     // this day as a string. this should be unique
     // 2025/01/02
-    DateKey string
+    DateKey string `json:"dateKey"`
 
-    Entries []*TimeEntry
+    Entries []*TimeEntry `json:"entries"`
 
     // seconds
-    TotalDuration int64
+    TotalDuration int64 `json:"totalDuration"`
 }
 
 // compute the day string of a date. before hour marks the next day. if date occurs before
@@ -69,7 +69,7 @@ func GroupTimeEntries(entries []*TimeEntry,beforeHour int) []*DayContainer {
 }
 
 // sort day containers in place based on date key
-func sortDayContainers(dayContainers []*DayContainer) {
+func SortDayContainers(dayContainers []*DayContainer) {
     sort.Slice(dayContainers, func(i int, j int) bool {
         // Parse the date keys
         var di time.Time
