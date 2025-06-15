@@ -18,6 +18,9 @@ type DayContainer struct {
     // 2025/01/02
     DateKey string `json:"dateKey"`
 
+    // unix seconds date. set at midnight.
+    Date int64 `json:"date"`
+
     Entries []*TimeEntry `json:"entries"`
 
     // seconds
@@ -36,6 +39,24 @@ func computeDate(unixTime int64,beforeHour int) string {
     return entryDate.Format("2006/01/02")
 }
 
+// given a date, floor the date to midnight. if the date is before the before hour,
+// subtracts 1 day before flooring
+func floorDate(unixSeconds int64,beforeHour int) int64 {
+    var date time.Time=time.Unix(unixSeconds,0)
+
+    if date.Hour()<beforeHour {
+        date=date.Add(-24*time.Hour)
+    }
+
+    date=time.Date(
+        date.Year(),date.Month(),date.Day(),
+        0,0,0,0,
+        time.Local,
+    )
+
+    return date.Unix()
+}
+
 // group time entries into corresponding day containers
 func GroupTimeEntries(entries []*TimeEntry,beforeHour int) []*DayContainer {
     var dayContainers DayContainerDict=DayContainerDict{}
@@ -50,6 +71,7 @@ func GroupTimeEntries(entries []*TimeEntry,beforeHour int) []*DayContainer {
         if !in {
             dayContainers[entryDate]=&DayContainer{
                 DateKey: entryDate,
+                Date: floorDate(entry.TimeStart,beforeHour),
                 Entries: []*TimeEntry{},
                 TotalDuration: 0,
             }
