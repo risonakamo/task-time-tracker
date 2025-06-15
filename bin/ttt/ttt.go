@@ -60,6 +60,8 @@ func main() {
     var dayContainers []*ttt.DayContainer
 
 
+
+
     // --- functions
     // create ttt state for sending out
     createAppState:=func() TTTState {
@@ -85,6 +87,11 @@ func main() {
         ttt.SortTimeEntrys(timeEntrys)
         dayContainers=ttt.GroupTimeEntries(timeEntrys,beforeHour)
     }
+
+
+    // --- example data
+    timeEntrys=ttt.ExampleTimeEntries1
+    organiseTimeEntries()
 
 
     // --- routes
