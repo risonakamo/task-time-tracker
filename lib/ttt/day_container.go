@@ -37,7 +37,7 @@ func computeDate(unixTime int64,beforeHour int) string {
 }
 
 // group time entries into corresponding day containers
-func groupTimeEntries(entries []*TimeEntry,beforeHour int) []*DayContainer {
+func GroupTimeEntries(entries []*TimeEntry,beforeHour int) []*DayContainer {
     var dayContainers DayContainerDict=DayContainerDict{}
 
     var entry *TimeEntry

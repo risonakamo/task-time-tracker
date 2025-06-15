@@ -24,6 +24,8 @@ type TTTState struct {
     CurrentTask ttt.TimeEntry `json:"currentTask"`
 
     AllTasks []*ttt.TimeEntry `json:"allTasks"`
+
+    DayContainers []*ttt.DayContainer `json:"dayContainers"`
 }
 
 func main() {
@@ -32,6 +34,7 @@ func main() {
     var e error
 
     var webBuildDir string=filepath.Join(here,"../../task-time-tracker-web/build")
+    var beforeHour int=8
 
 
     // --- app setup
@@ -49,10 +52,12 @@ func main() {
 
     // --- state
     // list of time entrys
-    var timeEntrys []*ttt.TimeEntry=[]*ttt.TimeEntry{}
+    var timeEntrys []*ttt.TimeEntry
 
     // the current task. also exists in the time entrys
     var currentTask *ttt.TimeEntry=nil
+
+    var dayContainers []*ttt.DayContainer
 
 
     // --- functions
@@ -70,7 +75,15 @@ func main() {
             CurrentTaskValid: currentTaskValid,
             CurrentTask: curTaskForAppstate,
             AllTasks: timeEntrys,
+            DayContainers: dayContainers,
         }
+    }
+
+    // do operations to organise time entry related states. should be used after modifying
+    // time entrys
+    organiseTimeEntries:=func() {
+        ttt.SortTimeEntrys(timeEntrys)
+        dayContainers=ttt.GroupTimeEntries(timeEntrys,beforeHour)
     }
 
 
@@ -98,7 +111,7 @@ func main() {
         var newTask ttt.TimeEntry=ttt.NewTimeEntry(body.Title)
 
         timeEntrys=append(timeEntrys,&newTask)
-        ttt.SortTimeEntrys(timeEntrys)
+        organiseTimeEntries()
         currentTask=&newTask
 
         var result TTTState=createAppState()
