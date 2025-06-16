@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"encoding/json"
+	"errors"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -42,4 +45,50 @@ func OpenTargetWithDefaultProgram(url string) error {
     }
 
     return nil
+}
+
+// overwrite target json file with a new file
+func WriteJson(filename string,data any) error {
+	var wfile *os.File
+	var e error
+	wfile,e=os.Create(filename)
+
+	if e!=nil {
+		panic(e)
+	}
+
+	defer wfile.Close()
+
+	var jsondata []byte
+	jsondata,e=json.Marshal(data)
+
+	if e!=nil {
+		panic(e)
+	}
+
+	wfile.Write(jsondata)
+	return nil
+}
+
+// read an deserialise json file
+func ReadJson[DataT any](filename string) (DataT,error) {
+    var data []byte
+	var e error
+	data,e=os.ReadFile(filename)
+
+	if errors.Is(e,fs.ErrNotExist) {
+		log.Info().Msgf("file not found: %s",filename)
+		var def DataT
+		return def,e
+	}
+
+	if e!=nil {
+		var def DataT
+		return def,e
+	}
+
+	var parsedData DataT
+    json.Unmarshal(data,&parsedData)
+
+	return parsedData,nil
 }

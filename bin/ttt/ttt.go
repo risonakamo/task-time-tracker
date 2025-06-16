@@ -31,9 +31,11 @@ type TTTState struct {
 func main() {
     // --- consts
 	var here string = utils.GetHereDirExe()
+    utils.ConfigureDefaultZeroLogger()
     var e error
 
     var webBuildDir string=filepath.Join(here,"../../task-time-tracker-web/build")
+    var dataFile string=filepath.Join(here,"data.json")
     var beforeHour int=8
 
 
@@ -89,9 +91,40 @@ func main() {
         ttt.SortDayContainers(dayContainers)
     }
 
+    // read the data json and set values
+    initialStateLoad:=func() {
+        var savedState TTTState
+        savedState,e=utils.ReadJson[TTTState](dataFile)
 
-    // --- example data
-    timeEntrys=ttt.ExampleTimeEntries1
+        if e!=nil {
+            log.Warn().Err(e).Msg("failed to load data file")
+            return
+        }
+
+        timeEntrys=savedState.AllTasks
+
+        if savedState.CurrentTaskValid {
+            currentTask,e=ttt.FindTimeEntry(timeEntrys,savedState.CurrentTask.Id)
+
+            if e!=nil {
+                log.Error().Msg("failed to find current task")
+            }
+        }
+    }
+
+    // write state to the data file
+    writeState:=func() {
+        e=utils.WriteJson(dataFile,createAppState())
+
+        if e!=nil {
+            log.Warn().Err(e).Msg("failed to write data file")
+        }
+    }
+
+
+    // --- data load
+    // timeEntrys=ttt.ExampleTimeEntries1
+    initialStateLoad()
     organiseTimeEntries()
 
 
@@ -123,6 +156,7 @@ func main() {
         currentTask=&newTask
 
         var result TTTState=createAppState()
+        writeState()
         return c.JSON(result)
     })
 
@@ -134,6 +168,7 @@ func main() {
         }
 
         var result TTTState=createAppState()
+        writeState()
         return c.JSON(result)
     })
 

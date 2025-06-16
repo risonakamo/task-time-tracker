@@ -2,6 +2,7 @@
 package ttt
 
 import (
+	"errors"
 	"sort"
 	"time"
 
@@ -46,4 +47,16 @@ func SortTimeEntrys(tasks []*TimeEntry) {
     sort.Slice(tasks, func(task1i int,task2i int) bool {
         return tasks[task1i].TimeStart > tasks[task2i].TimeStart
     })
+}
+
+// find pointer to a time entry from list
+func FindTimeEntry(entries []*TimeEntry,id string) (*TimeEntry,error) {
+    var entry *TimeEntry
+    for _,entry = range entries {
+        if entry.Id==id {
+            return entry,nil
+        }
+    }
+
+    return nil,errors.New("failed to find entry")
 }

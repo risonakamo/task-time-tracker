@@ -75,7 +75,7 @@ func Test_groupTimeEntries(t *testing.T) {
     var beforeHour int=8
 
     result:=GroupTimeEntries(entries,beforeHour)
-    sortDayContainers(result)
+    SortDayContainers(result)
 
     pp.Println(result)
 }
