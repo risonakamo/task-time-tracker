@@ -178,6 +178,17 @@ func main() {
         return c.JSON(result)
     })
 
+    // edit a task by overwriting it
+    // app.Post("/edit-task",func (c fiber.Ctx) error {
+    //     var body ttt.TimeEntry
+    //     e=c.Bind().JSON(&body)
+
+    //     if e!=nil {
+    //         log.Err(e)
+    //         return e
+    //     }
+    // })
+
 
     // --- running
     e=utils.OpenTargetWithDefaultProgram(
