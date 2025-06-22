@@ -1,2 +1,3 @@
 *.exe
 bin/ttt/data.json
+bin/ttt/backup

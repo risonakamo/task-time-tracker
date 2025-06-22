@@ -84,9 +84,13 @@ func main() {
     }
 
     // do operations to organise time entry related states. should be used after modifying
-    // time entrys
+    // time entrys.
+    // - recalculates all day containers
+    // - recomputes durations on time entries
+    // - sorts entrys/containers
     organiseTimeEntries:=func() {
         ttt.SortTimeEntrys(timeEntrys)
+        ttt.RepairTimeEntries(timeEntrys)
         dayContainers=ttt.GroupTimeEntries(timeEntrys,beforeHour)
         ttt.SortDayContainers(dayContainers)
     }
@@ -167,8 +171,10 @@ func main() {
             currentTask=nil
         }
 
-        var result TTTState=createAppState()
+        organiseTimeEntries()
         writeState()
+
+        var result TTTState=createAppState()
         return c.JSON(result)
     })
 
@@ -178,16 +184,32 @@ func main() {
         return c.JSON(result)
     })
 
-    // edit a task by overwriting it
-    // app.Post("/edit-task",func (c fiber.Ctx) error {
-    //     var body ttt.TimeEntry
-    //     e=c.Bind().JSON(&body)
+    // edit a task by overwriting it. give the entire task to be edited.
+    // returns the new state
+    app.Post("/edit-task",func (c fiber.Ctx) error {
+        var body ttt.TimeEntry
+        e=c.Bind().JSON(&body)
 
-    //     if e!=nil {
-    //         log.Err(e)
-    //         return e
-    //     }
-    // })
+        if e!=nil {
+            log.Err(e)
+            return e
+        }
+
+        var foundEntryI int
+        foundEntryI,e=ttt.FindTimeEntryIndex(timeEntrys,body.Id)
+
+        if e!=nil {
+            log.Err(e).Msg("failed to find entry to edit")
+            return e
+        }
+
+        timeEntrys[foundEntryI]=&body
+        organiseTimeEntries()
+        writeState()
+
+        var result TTTState=createAppState()
+        return c.JSON(result)
+    })
 
 
     // --- running

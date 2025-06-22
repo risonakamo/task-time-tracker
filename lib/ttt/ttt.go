@@ -51,12 +51,37 @@ func SortTimeEntrys(tasks []*TimeEntry) {
 
 // find pointer to a time entry from list
 func FindTimeEntry(entries []*TimeEntry,id string) (*TimeEntry,error) {
+    var e error
+    var foundI int
+    foundI,e=FindTimeEntryIndex(entries,id)
+
+    if e!=nil {
+        return nil,e
+    }
+
+    return entries[foundI],nil
+}
+
+// find time entry, but return index instead
+func FindTimeEntryIndex(entries []*TimeEntry,id string) (int,error) {
+    var entryI int
     var entry *TimeEntry
-    for _,entry = range entries {
+    for entryI,entry = range entries {
         if entry.Id==id {
-            return entry,nil
+            return entryI,nil
         }
     }
 
-    return nil,errors.New("failed to find entry")
+    return 0,errors.New("failed to find entry")
+}
+
+// fixes all durations on time entries in list of entries.
+// mutates the entries in the given list
+func RepairTimeEntries(tasks []*TimeEntry) {
+    var entry *TimeEntry
+    for _,entry = range tasks {
+        if entry.TimeEnd>0 {
+            entry.Duration=entry.TimeEnd-entry.TimeStart
+        }
+    }
 }

@@ -1,0 +1,21 @@
+meta {
+  name: edit task
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseurl}}/edit-task
+  body: json
+  auth: inherit
+}
+
+body:json {
+      {
+        "id": "e6c207bb-9aaf-41e6-9bf1-3221fb3a7f4c",
+        "title": "sk2",
+        "timeStart": 1750532652,
+        "timeEnd": 1750533261,
+        "duration": 10
+      }
+}
