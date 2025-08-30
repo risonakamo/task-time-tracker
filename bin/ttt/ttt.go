@@ -211,6 +211,24 @@ func main() {
         return c.JSON(result)
     })
 
+    // apply time entry edits. returns new state
+    app.Post("/edit-tasks2",func (c fiber.Ctx) error {
+        var body []ttt.TimeEntryEdit
+        e=c.Bind().JSON(&body)
+
+        if e!=nil {
+            log.Err(e)
+            return e
+        }
+
+        timeEntrys=ttt.ApplyTimeEntryEdits(timeEntrys,body)
+        organiseTimeEntries()
+        writeState()
+
+        var result TTTState=createAppState()
+        return c.JSON(result)
+    })
+
 
     // --- running
     e=utils.OpenTargetWithDefaultProgram(

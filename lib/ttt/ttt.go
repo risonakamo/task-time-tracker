@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 // a single task time entry
@@ -20,6 +21,18 @@ type TimeEntry struct {
     TimeEnd int64 `json:"timeEnd"`
     // seconds. -1 if not ended
     Duration int64 `json:"duration"`
+}
+
+// edit to a time entry
+type TimeEntryEdit struct {
+    Id string `json:"id"`
+
+    // empty to unset
+    Title string `json:"title"`
+    // -1 to unset
+    TimeStart int64 `json:"timeStart"`
+    // -1 to unset
+    TimeEnd int64 `json:"timeEnd"`
 }
 
 // create a new time entry with date starting at now
@@ -84,4 +97,35 @@ func RepairTimeEntries(tasks []*TimeEntry) {
             entry.Duration=entry.TimeEnd-entry.TimeStart
         }
     }
+}
+
+// apply edits to list of time entries. returns list, but also mutates since
+// it is pointer array
+func ApplyTimeEntryEdits(entries []*TimeEntry,edits []TimeEntryEdit) []*TimeEntry {
+    var e error
+
+    var edit TimeEntryEdit
+    for _,edit = range edits {
+        var entryIndex int
+        entryIndex,e=FindTimeEntryIndex(entries,edit.Id)
+
+        if e!=nil {
+            log.Warn().Err(e).Msgf("failed to find entry to edit: %s",edit.Id)
+            continue
+        }
+
+        if len(edit.Title)>0 {
+            entries[entryIndex].Title=edit.Title
+        }
+
+        if edit.TimeStart>0 {
+            entries[entryIndex].TimeStart=edit.TimeStart
+        }
+
+        if edit.TimeEnd>0 {
+            entries[entryIndex].TimeEnd=edit.TimeEnd
+        }
+    }
+
+    return entries
 }
