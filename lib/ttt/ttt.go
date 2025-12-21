@@ -118,13 +118,21 @@ func ApplyTimeEntryEdits(entries []*TimeEntry,edits []TimeEntryEdit) []*TimeEntr
             entries[entryIndex].Title=edit.Title
         }
 
-        if edit.TimeStart>0 {
-            entries[entryIndex].TimeStart=edit.TimeStart
+        // if timestart/timeend are both set, but time start is over time end,
+        // don't change the time.
+        if edit.TimeStart>0 && edit.TimeEnd>0 && edit.TimeStart>edit.TimeEnd {
+
+        // otherwise, set whichever one is above 0
+        } else {
+            if edit.TimeStart>0 {
+                entries[entryIndex].TimeStart=edit.TimeStart
+            }
+
+            if edit.TimeEnd>0 {
+                entries[entryIndex].TimeEnd=edit.TimeEnd
+            }
         }
 
-        if edit.TimeEnd>0 {
-            entries[entryIndex].TimeEnd=edit.TimeEnd
-        }
     }
 
     return entries
