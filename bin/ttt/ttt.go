@@ -229,6 +229,13 @@ func main() {
         return c.JSON(result)
     })
 
+    // open the data dir
+    app.Get("/open-data-folder",func(c fiber.Ctx) error {
+        utils.OpenTargetWithDefaultProgram(here)
+
+        return c.SendStatus(fiber.StatusOK)
+    })
+
 
     // --- running
     e=utils.OpenTargetWithDefaultProgram(
