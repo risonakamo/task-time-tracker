@@ -236,6 +236,11 @@ func main() {
         return c.SendStatus(fiber.StatusOK)
     })
 
+    // close the program
+    app.Get("/close",func(c fiber.Ctx) error {
+        return app.Shutdown()
+    })
+
 
     // --- running
     e=utils.OpenTargetWithDefaultProgram(
