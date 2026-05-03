@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"os"
 	"path/filepath"
 	"task-time-tracker/lib/ttt"
 	"task-time-tracker/lib/utils"
@@ -28,6 +29,19 @@ type TTTState struct {
     DayContainers []*ttt.DayContainer `json:"dayContainers"`
 }
 
+// request body to change to another project data json.
+// the proj name must match a file in the data folder, including
+// the json extension
+type ChangeProjReq struct {
+    NewProjName string
+}
+
+// new persisted simpler state
+type TTTState2 struct {
+    // filename of last data file. might be empty
+    LastDataFile string `yaml:"lastDataFile"`
+}
+
 func main() {
     // --- consts
 	var here string = utils.GetHereDirExe()
@@ -35,8 +49,15 @@ func main() {
     var e error
 
     var webBuildDir string=filepath.Join(here,"../../task-time-tracker-web/build")
-    var dataFile string=filepath.Join(here,"data.json")
+    var dataFolder string=filepath.Join(here,"data")
+    var dataConfigFile string=filepath.Join(here,"data.yml")
+    var dataFile string=""
+
+    // 24 hour time of day used to be considered the end of the day
     var beforeHour int=8
+
+    var projectLoaded bool=false
+
 
 
     // --- app setup
@@ -52,6 +73,7 @@ func main() {
     app.Use("/*",static.New(webBuildDir))
 
 
+
     // --- state
     // list of time entrys
     var timeEntrys []*ttt.TimeEntry
@@ -60,6 +82,9 @@ func main() {
     var currentTask *ttt.TimeEntry=nil
 
     var dayContainers []*ttt.DayContainer
+
+    var config TTTState2
+
 
 
 
@@ -125,11 +150,70 @@ func main() {
         }
     }
 
+    // load the initial non project specific config file
+    loadConfig:=func() TTTState2 {
+        var config TTTState2
+        config,e=utils.ReadYaml[TTTState2](dataConfigFile)
+
+        if e!=nil {
+            log.Warn().Err(e).Msg("failed to load config file, using empty config")
+            return TTTState2{}
+        }
+
+        return config
+    }
+
+    // write to the non project specific config file
+    saveConfig:=func(config TTTState2) {
+        e=utils.WriteYaml(dataConfigFile,config)
+
+        if e!=nil {
+            log.Warn().Err(e).Msg("failed to save config file")
+        }
+    }
+
+    // change the current project
+    changeProject:=func(newProjectFile string) {
+        if len(newProjectFile)==0 {
+            log.Info().Msg("no last project file configured, staying unloaded")
+            projectLoaded=false
+            return
+        }
+
+        var targetFile string=filepath.Join(dataFolder,newProjectFile)
+
+        _,e=os.Stat(targetFile)
+
+        if e!=nil {
+            if os.IsNotExist(e) {
+                log.Warn().Msgf("last project file does not exist: %s", targetFile)
+                projectLoaded=false
+                return
+            }
+            log.Err(e).Msg("failed to stat last project file")
+            projectLoaded=false
+            return
+        }
+
+        dataFile=targetFile
+        initialStateLoad()
+        organiseTimeEntries()
+        projectLoaded=true
+    }
+
+
+
+
 
     // --- data load
     // timeEntrys=ttt.ExampleTimeEntries1
-    initialStateLoad()
-    organiseTimeEntries()
+    config=loadConfig()
+    changeProject(config.LastDataFile)
+    if projectLoaded {
+        saveConfig(config)
+    }
+
+
 
 
     // --- routes
@@ -241,6 +325,30 @@ func main() {
         return app.Shutdown()
     })
 
+    // change to another project
+    app.Post("/change-project",func(c fiber.Ctx) error {
+        var body ChangeProjReq
+        e=c.Bind().JSON(&body)
+
+        if e!=nil {
+            log.Err(e)
+            return e
+        }
+
+        changeProject(body.NewProjName)
+
+        if !projectLoaded {
+            return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+                "error": "project file does not exist",
+            })
+        }
+
+        config.LastDataFile=body.NewProjName
+        saveConfig(config)
+
+        var result TTTState=createAppState()
+        return c.JSON(result)
+    })
 
     // --- running
     e=utils.OpenTargetWithDefaultProgram(
