@@ -1,3 +1,5 @@
 *.exe
 bin/ttt/data.json
+bin/ttt/data
+bin/ttt/data.yml
 bin/ttt/backup

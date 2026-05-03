@@ -19,6 +19,8 @@ type StartTaskReq struct {
 
 // state container to send out
 type TTTState struct {
+    ProjectLoaded bool `json:"projectLoaded"`
+
     // if there is actually a current task
     CurrentTaskValid bool `json:"currentTaskValid"`
     // this might empty task if none active
@@ -101,6 +103,7 @@ func main() {
         }
 
         return TTTState{
+            ProjectLoaded: projectLoaded,
             CurrentTaskValid: currentTaskValid,
             CurrentTask: curTaskForAppstate,
             AllTasks: timeEntrys,
@@ -220,6 +223,10 @@ func main() {
     // start a task. returns the newly updated state
     // if another task was running already, ends it immediately
     app.Post("/start-task",func(c fiber.Ctx) error {
+        if !projectLoaded {
+            return c.Status(fiber.StatusBadRequest).SendString("no project loaded")
+        }
+
         var body StartTaskReq
         e=c.Bind().JSON(&body)
 
@@ -250,6 +257,10 @@ func main() {
 
     // stops the current task, if there is any. returns the new state
     app.Post("/stop-task",func(c fiber.Ctx) error {
+        if !projectLoaded {
+            return c.Status(fiber.StatusBadRequest).SendString("no project loaded")
+        }
+
         if currentTask!=nil {
             ttt.EndTask(currentTask)
             currentTask=nil
@@ -271,6 +282,10 @@ func main() {
     // edit a task by overwriting it. give the entire task to be edited.
     // returns the new state
     app.Post("/edit-task",func (c fiber.Ctx) error {
+        if !projectLoaded {
+            return c.Status(fiber.StatusBadRequest).SendString("no project loaded")
+        }
+
         var body ttt.TimeEntry
         e=c.Bind().JSON(&body)
 
@@ -297,6 +312,10 @@ func main() {
 
     // apply time entry edits. returns new state
     app.Post("/edit-tasks2",func (c fiber.Ctx) error {
+        if !projectLoaded {
+            return c.Status(fiber.StatusBadRequest).SendString("no project loaded")
+        }
+
         var body []ttt.TimeEntryEdit
         e=c.Bind().JSON(&body)
 
@@ -338,9 +357,7 @@ func main() {
         changeProject(body.NewProjName)
 
         if !projectLoaded {
-            return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-                "error": "project file does not exist",
-            })
+            return c.Status(fiber.StatusBadRequest).SendString("project file does not exist")
         }
 
         config.LastDataFile=body.NewProjName
