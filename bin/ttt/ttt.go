@@ -54,12 +54,12 @@ func main() {
 
     // --- state
     // list of time entrys
-    var timeEntrys []*ttt.TimeEntry
+    var timeEntrys []*ttt.TimeEntry=[]*ttt.TimeEntry{}
 
     // the current task. also exists in the time entrys
     var currentTask *ttt.TimeEntry=nil
 
-    var dayContainers []*ttt.DayContainer
+    var dayContainers []*ttt.DayContainer=[]*ttt.DayContainer{}
 
 
 
