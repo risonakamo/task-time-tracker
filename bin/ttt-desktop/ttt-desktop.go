@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"embed"
 	"errors"
+	"path/filepath"
 	"task-time-tracker/lib/ttt"
 	"task-time-tracker/lib/utils"
 
@@ -10,6 +12,7 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 //go:embed all:web-build
@@ -69,10 +72,13 @@ type TTTState struct {
 
 // ttt app constructor
 func newTTTApp() *TTTApp {
+    var here string = utils.GetHereDirExe()
+
     var app *TTTApp=&TTTApp{
         timeEntrys: []*ttt.TimeEntry{},
         currentTask: nil,
         dayContainers: []*ttt.DayContainer{},
+        dataFile: filepath.Join(here, "data.json"),
     }
 
     app.initialStateLoad()
@@ -164,4 +170,63 @@ func (app *TTTApp) StartTask(startTaskReq StartTaskReq) (TTTState,error) {
     var result TTTState=app.createAppState()
     app.writeState()
     return result,nil
+}
+
+// stop the current task, if there is any. returns the new state
+func (app *TTTApp) StopTask() (TTTState,error) {
+    if app.currentTask!=nil {
+        ttt.EndTask(app.currentTask)
+        app.currentTask=nil
+    }
+
+    app.organiseTimeEntries()
+    app.writeState()
+
+    var result TTTState=app.createAppState()
+    return result,nil
+}
+
+// get the current app state
+func (app *TTTApp) TaskState() TTTState {
+    return app.createAppState()
+}
+
+// edit a task by overwriting it. give the entire task to be edited.
+// returns the new state
+func (app *TTTApp) EditTask(body ttt.TimeEntry) (TTTState,error) {
+    var foundEntryI int
+    var e error
+    foundEntryI,e=ttt.FindTimeEntryIndex(app.timeEntrys,body.Id)
+
+    if e!=nil {
+        log.Err(e).Msg("failed to find entry to edit")
+        return TTTState{},e
+    }
+
+    app.timeEntrys[foundEntryI]=&body
+    app.organiseTimeEntries()
+    app.writeState()
+
+    var result TTTState=app.createAppState()
+    return result,nil
+}
+
+// apply time entry edits. returns new state
+func (app *TTTApp) EditTasks2(body []ttt.TimeEntryEdit) (TTTState,error) {
+    app.timeEntrys=ttt.ApplyTimeEntryEdits(app.timeEntrys,body)
+    app.organiseTimeEntries()
+    app.writeState()
+
+    var result TTTState=app.createAppState()
+    return result,nil
+}
+
+// open the data dir
+func (app *TTTApp) OpenDataFolder() error {
+    return utils.OpenTargetWithDefaultProgram(filepath.Dir(app.dataFile))
+}
+
+// close the program
+func (app *TTTApp) Close(ctx context.Context) {
+    runtime.Quit(ctx)
 }
