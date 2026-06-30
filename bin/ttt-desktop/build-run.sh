@@ -4,5 +4,7 @@ cd $HERE
 
 cp -r ../../task-time-tracker-web/build ./web-build
 
+wails generate module
+
 go build -tags dev -gcflags "all=-N -l" ttt-desktop.go
-./ttt-desktop.exe
+# ./ttt-desktop.exe

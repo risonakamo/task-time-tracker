@@ -4,3 +4,4 @@ bin/ttt/data.yml
 bin/ttt/data
 bin/ttt/backup
 web-build
+wails-js-out

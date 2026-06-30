@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"errors"
 	"task-time-tracker/lib/ttt"
 	"task-time-tracker/lib/utils"
 
@@ -140,4 +141,27 @@ func (app *TTTApp) writeState() {
     if e!=nil {
         log.Warn().Err(e).Msg("failed to write data file")
     }
+}
+
+// start a task. returns the newly updated state
+// if another task was running already, ends it immediately
+func (app *TTTApp) StartTask(startTaskReq StartTaskReq) (TTTState,error) {
+    if len(startTaskReq.Title)==0 {
+        log.Error().Msgf("requested to start task with no title")
+        return TTTState{},errors.New("provided no title")
+    }
+
+    if app.currentTask!=nil {
+        ttt.EndTask(app.currentTask)
+    }
+
+    var newTask ttt.TimeEntry=ttt.NewTimeEntry(startTaskReq.Title)
+
+    app.timeEntrys=append(app.timeEntrys,&newTask)
+    app.organiseTimeEntries()
+    app.currentTask=&newTask
+
+    var result TTTState=app.createAppState()
+    app.writeState()
+    return result,nil
 }

@@ -1,0 +1,4 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "wailsjsdir":"wails-js-out"
+}
