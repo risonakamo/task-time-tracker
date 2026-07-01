@@ -22,4 +22,4 @@ cp -r $webdir/build ./web-build
 
 # build go
 go build -tags dev -gcflags "all=-N -l" ttt-desktop.go
-# ./ttt-desktop.exe
+./ttt-desktop.exe

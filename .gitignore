@@ -1,7 +1,7 @@
 *.exe
-bin/ttt/data.json
-bin/ttt/data.yml
-bin/ttt/data
-bin/ttt/backup
+bin/*/data.json
+bin/*/data.yml
+bin/*/data
+bin/*/backup
 web-build
 wails-js-out
