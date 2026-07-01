@@ -51,6 +51,8 @@ type TTTApp struct {
     dayContainers []*ttt.DayContainer
 
     dataFile string
+
+    ctx context.Context
 }
 
 // request body to start new task
@@ -227,6 +229,11 @@ func (app *TTTApp) OpenDataFolder() error {
 }
 
 // close the program
-func (app *TTTApp) Close(ctx context.Context) {
-    runtime.Quit(ctx)
+func (app *TTTApp) Close() {
+    runtime.Quit(app.ctx)
+}
+
+// wails startup func
+func (app *TTTApp) startup(ctx context.Context) {
+    app.ctx=ctx
 }
