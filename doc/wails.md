@@ -1,0 +1,1 @@
+https://v3.wails.io/migration/v2-to-v3/
