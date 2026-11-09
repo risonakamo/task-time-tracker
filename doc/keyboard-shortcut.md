@@ -1,0 +1,12 @@
+- `ctrl+space`
+    - If focused on the task entry textbox:
+        - Start the task in the entry textbox
+    - If not focused on the task entry textbox:
+        - If there is a running task:
+            - Ends the currently running task
+        - If there isn't a running task:
+            - Focuses on the entry textbox
+- `ctrl+q`: Use Redo action
+    - Starts the last task again
+    - If a task was running, ends it and starts the last task
+- `alt+q`: Quit program
