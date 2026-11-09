@@ -8,5 +8,5 @@
             - Focuses on the entry textbox
 - `ctrl+q`: Use Redo action
     - Starts the last task again
-    - If a task was running, ends it and starts the last task
+    - If a task was running, ends it instead
 - `alt+q`: Quit program
